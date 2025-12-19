@@ -5,8 +5,7 @@
   "description": "Decode FT8 amateur radio signals from browser audio in real-time",
   "permissions": [
     "tabCapture",
-    "activeTab",
-    "storage"
+    "activeTab"
   ],
   "action": {
     "default_popup": "popup.html",
