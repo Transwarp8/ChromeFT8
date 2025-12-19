@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FT8 Icon Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a2e; color: white; }
+    canvas { border: 1px solid #333; margin: 10px; }
+    a { color: #00d9ff; }
+    .icons { display: flex; gap: 20px; flex-wrap: wrap; }
+    .icon-group { text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>FT8 Browser Decoder - Icon Generator</h1>
+  <p>Right-click each canvas and "Save Image As" to save the icons.</p>
+  
+  <div class="icons">
+    <div class="icon-group">
+      <canvas id="icon16" width="16" height="16"></canvas>
+      <p>icon16.png</p>
+    </div>
+    <div class="icon-group">
+      <canvas id="icon48" width="48" height="48"></canvas>
+      <p>icon48.png</p>
+    </div>
+    <div class="icon-group">
+      <canvas id="icon128" width="128" height="128"></canvas>
+      <p>icon128.png</p>
+    </div>
+  </div>
+
+  <script>
+    function drawIcon(canvas) {
+      const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      const scale = size / 128;
+      
+      // Background
+      ctx.fillStyle = '#0a0e14';
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 2*scale, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Border gradient
+      const borderGrad = ctx.createLinearGradient(0, 0, size, size);
+      borderGrad.addColorStop(0, '#00d9ff');
+      borderGrad.addColorStop(1, '#7c3aed');
+      ctx.strokeStyle = borderGrad;
+      ctx.lineWidth = 3 * scale;
+      ctx.stroke();
+      
+      // Waterfall area
+      ctx.fillStyle = '#151c28';
+      const margin = 16 * scale;
+      const wfHeight = 45 * scale;
+      ctx.fillRect(margin, size/2 - wfHeight/2, size - 2*margin, wfHeight);
+      
+      // Waterfall bars
+      const barWidth = 6 * scale;
+      const barGap = 2 * scale;
+      const numBars = Math.floor((size - 2*margin - barWidth) / (barWidth + barGap));
+      const startX = margin + 4*scale;
+      const barTop = size/2 - wfHeight/2 + 4*scale;
+      const barHeight = wfHeight - 8*scale;
+      
+      for (let i = 0; i < numBars; i++) {
+        const x = startX + i * (barWidth + barGap);
+        const intensity = Math.sin(i / numBars * Math.PI) * 0.7 + 0.3;
+        
+        const barGrad = ctx.createLinearGradient(0, barTop + barHeight, 0, barTop);
+        barGrad.addColorStop(0, `rgba(0, 217, 255, ${intensity * 0.3})`);
+        barGrad.addColorStop(0.5, `rgba(0, 255, 157, ${intensity * 0.6})`);
+        barGrad.addColorStop(0.75, `rgba(255, 184, 0, ${intensity * 0.8})`);
+        barGrad.addColorStop(1, `rgba(255, 71, 87, ${intensity})`);
+        
+        ctx.fillStyle = barGrad;
+        ctx.fillRect(x, barTop, barWidth, barHeight);
+      }
+      
+      // Signal line
+      ctx.strokeStyle = '#00ff9d';
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      ctx.moveTo(margin, size/2);
+      const wavePoints = 20;
+      for (let i = 0; i <= wavePoints; i++) {
+        const x = margin + i * (size - 2*margin) / wavePoints;
+        const y = size/2 + Math.sin(i * 0.8) * 8 * scale;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      // FT8 text (only for larger icons)
+      if (size >= 48) {
+        ctx.font = `bold ${14 * scale}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        const textGrad = ctx.createLinearGradient(0, size - 15*scale, size, size - 15*scale);
+        textGrad.addColorStop(0, '#00d9ff');
+        textGrad.addColorStop(1, '#7c3aed');
+        ctx.fillStyle = textGrad;
+        ctx.fillText('FT8', size/2, size - 12*scale);
+      }
+    }
+    
+    drawIcon(document.getElementById('icon16'));
+    drawIcon(document.getElementById('icon48'));
+    drawIcon(document.getElementById('icon128'));
+  </script>
+</body>
+</html>

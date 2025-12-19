@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FT8 Decoder</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">📻</span>
+        <h1>FT8 Decoder</h1>
+      </div>
+      <div class="controls">
+        <button id="startBtn" class="btn btn-primary">
+          <span class="btn-text">▶ Start</span>
+        </button>
+        <button id="stopBtn" class="btn btn-danger" disabled>
+          <span class="btn-text">■ Stop</span>
+        </button>
+        <button id="clearBtn" class="btn btn-secondary">
+          <span class="btn-text">Clear</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="status-bar">
+      <div class="status-item">
+        <span class="status-label">Status:</span>
+        <span id="statusText" class="status-value status-idle">Idle</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Time Sync:</span>
+        <span id="timeSyncStatus" class="status-value">--</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Decoded:</span>
+        <span id="decodedCount" class="status-value">0</span>
+      </div>
+    </section>
+
+    <section class="waterfall-section">
+      <div class="section-header">
+        <h2>Waterfall Display</h2>
+        <div class="freq-range">
+          <span id="freqMin">200</span> - <span id="freqMax">3000</span> Hz
+        </div>
+      </div>
+      <canvas id="waterfallCanvas" width="560" height="140"></canvas>
+      <div class="waterfall-overlay">
+        <div id="syncIndicators" class="sync-indicators"></div>
+      </div>
+    </section>
+
+    <section class="time-slot">
+      <div class="slot-progress">
+        <div id="slotProgressBar" class="slot-progress-bar"></div>
+      </div>
+      <div class="slot-info">
+        <span id="slotTime">--:--:--</span>
+        <span id="slotPhase" class="slot-phase">EVEN</span>
+        <span id="clockOffset" class="clock-offset"></span>
+      </div>
+    </section>
+
+    <section class="messages-section">
+      <div class="section-header">
+        <h2>Decoded Messages</h2>
+        <div class="message-controls">
+          <button id="filterToggle" class="btn btn-small btn-filter" data-filter="all">
+            All
+          </button>
+          <button id="exportBtn" class="btn btn-small btn-secondary" title="Export decode log">
+            Export
+          </button>
+        </div>
+      </div>
+      <div id="messagesList" class="messages-list">
+        <div class="empty-state">
+          <span class="empty-icon">📻</span>
+          <p>No messages decoded yet</p>
+          <p class="hint">Click Start to begin decoding</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>FT8 Decoder v1.1</span>
+      <span id="sessionStats">0 decodes</span>
+    </footer>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

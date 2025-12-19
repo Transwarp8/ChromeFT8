@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "FT8 Browser Decoder",
+  "version": "1.1.0",
+  "description": "Decode FT8 amateur radio signals from browser audio in real-time",
+  "permissions": [
+    "tabCapture",
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.PNG",
+      "48": "icon.PNG",
+      "128": "icon.PNG"
+    }
+  },
+  "icons": {
+    "16": "icon.PNG",
+    "48": "icon.PNG",
+    "128": "icon.PNG"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [{
+    "resources": ["decode.wasm", "encode.wasm", "ft8-wasm.js", "audio-processor.js"],
+    "matches": ["<all_urls>"]
+  }],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
