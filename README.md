@@ -15,10 +15,7 @@ A Chrome extension that decodes FT8 signals directly from browser audio.
 
 ## Installation
 
-1. Clone this repository
-2. Open Chrome and go to `chrome://extensions`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the `chrome-extension` folder
+Install from the [Chrome Web Store](https://chrome.google.com/webstore)
 
 ## Usage
 
