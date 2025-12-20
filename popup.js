@@ -1,6 +1,11 @@
-const FT8_SAMPLE_RATE = 12000;
-const FT8_SLOT_TIME = 15.0;
-const FT8_SYMBOL_PERIOD = 0.160;
+const SAMPLE_RATE = 12000;
+
+const MODE_CONFIG = {
+  FT8: { slotTime: 15.0, symbolPeriod: 0.160, name: 'FT8' },
+  FT4: { slotTime: 7.5, symbolPeriod: 0.048, name: 'FT4' }
+};
+
+let currentMode = 'FT8';
 
 const TIME_APIS = [
   { url: 'https://timeapi.io/api/Time/current/zone?timeZone=UTC', type: 'timeapi' }
@@ -21,6 +26,7 @@ let slotSampleRate = 0;
 
 let wasmDecoder = null;
 let wasmInitialized = false;
+let ft8ft4Module = null;
 
 let clockOffsetMs = 0;
 let timeSynced = false;
@@ -31,6 +37,10 @@ let waterfallHeight = 0;
 
 let decodeLog = [];
 let filterMode = 'all';
+
+function getSlotTime() {
+  return MODE_CONFIG[currentMode].slotTime;
+}
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -47,6 +57,10 @@ const slotTimeEl = document.getElementById('slotTime');
 const slotPhaseEl = document.getElementById('slotPhase');
 const clockOffsetEl = document.getElementById('clockOffset');
 const sessionStatsEl = document.getElementById('sessionStats');
+const modeFT8Btn = document.getElementById('modeFT8');
+const modeFT4Btn = document.getElementById('modeFT4');
+const modeTitle = document.getElementById('modeTitle');
+const footerMode = document.getElementById('footerMode');
 
 const ctx = waterfallCanvas.getContext('2d');
 
@@ -154,13 +168,24 @@ async function initWasmDecoder() {
   if (wasmInitialized) return true;
   
   try {
-    const wasmUrl = chrome.runtime.getURL('decode.wasm');
-    const moduleScript = await import(chrome.runtime.getURL('ft8-wasm.js'));
-    wasmDecoder = moduleScript;
-    wasmInitialized = true;
-    return true;
-  } catch (error) {
+    ft8ft4Module = await import(chrome.runtime.getURL('ft8ft4-wasm.js'));
+    const initOk = await ft8ft4Module.initModule();
+    if (initOk) {
+      ft8ft4Module.setProtocol(currentMode);
+      wasmDecoder = ft8ft4Module;
+      wasmInitialized = true;
+      return true;
+    }
     return false;
+  } catch (error) {
+    try {
+      const moduleScript = await import(chrome.runtime.getURL('ft8-wasm.js'));
+      wasmDecoder = moduleScript;
+      wasmInitialized = true;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
 
@@ -379,15 +404,15 @@ function exportDecodeLog() {
 
 function updateSlotProgress() {
   const now = getSyncedTime() / 1000;
-  const slotPosition = now % FT8_SLOT_TIME;
-  const progress = (slotPosition / FT8_SLOT_TIME) * 100;
+  const slotPosition = now % getSlotTime();
+  const progress = (slotPosition / getSlotTime()) * 100;
   
   slotProgressBar.style.width = `${progress}%`;
   
   const date = new Date(getSyncedTime());
   slotTimeEl.textContent = date.toISOString().slice(11, 19);
   
-  const slotNumber = Math.floor(now / FT8_SLOT_TIME);
+  const slotNumber = Math.floor(now / getSlotTime());
   const isEven = slotNumber % 2 === 0;
   slotPhaseEl.textContent = isEven ? 'EVEN' : 'ODD';
   slotPhaseEl.className = `slot-phase ${isEven ? '' : 'odd'}`;
@@ -406,7 +431,8 @@ async function triggerDecode() {
   
   const totalSamples = slotAudioBuffer.reduce((sum, chunk) => sum + chunk.length, 0);
   
-  if (totalSamples < FT8_SAMPLE_RATE * 10) {
+  const minSeconds = currentMode === 'FT4' ? 5 : 10;
+  if (totalSamples < SAMPLE_RATE * minSeconds) {
     slotAudioBuffer = [];
     return;
   }
@@ -419,8 +445,8 @@ async function triggerDecode() {
   }
   
   let samples = merged;
-  if (slotSampleRate !== FT8_SAMPLE_RATE) {
-    const resampler = new AudioResampler(slotSampleRate, FT8_SAMPLE_RATE);
+  if (slotSampleRate !== SAMPLE_RATE) {
+    const resampler = new AudioResampler(slotSampleRate, SAMPLE_RATE);
     samples = resampler.resample(merged);
   }
   
@@ -577,11 +603,29 @@ function stopCapture() {
   waterfallCanvas.classList.remove('recording');
 }
 
+function setMode(mode) {
+  if (isCapturing) return;
+  
+  currentMode = mode;
+  
+  modeFT8Btn.classList.toggle('active', mode === 'FT8');
+  modeFT4Btn.classList.toggle('active', mode === 'FT4');
+  
+  modeTitle.textContent = mode + ' Decoder';
+  footerMode.textContent = mode + ' Decoder v1.2';
+  
+  if (ft8ft4Module && ft8ft4Module.setProtocol) {
+    ft8ft4Module.setProtocol(mode);
+  }
+}
+
 startBtn.addEventListener('click', startCapture);
 stopBtn.addEventListener('click', stopCapture);
 clearBtn.addEventListener('click', clearMessages);
 exportBtn.addEventListener('click', exportDecodeLog);
 filterToggle.addEventListener('click', toggleFilter);
+modeFT8Btn.addEventListener('click', () => setMode('FT8'));
+modeFT4Btn.addEventListener('click', () => setMode('FT4'));
 
 function init() {
   try {

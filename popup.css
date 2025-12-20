@@ -86,6 +86,26 @@ body {
   text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
 }
 
+.mode-selector {
+  display: flex;
+  gap: 1px;
+  margin-left: 8px;
+}
+
+.btn-mode {
+  min-width: 40px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.btn-mode.active {
+  background: var(--win-selection);
+  color: var(--win-selection-text);
+  border-color: var(--win-btn-dark-shadow) var(--win-btn-highlight) var(--win-btn-highlight) var(--win-btn-dark-shadow);
+  box-shadow: inset 1px 1px 0 var(--win-btn-shadow);
+}
+
 .controls {
   display: flex;
   gap: 2px;

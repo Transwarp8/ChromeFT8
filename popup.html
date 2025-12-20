@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FT8 Decoder</title>
+  <title>FT8/FT4 Decoder</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -11,7 +11,11 @@
     <header class="header">
       <div class="logo">
         <span class="logo-icon">📻</span>
-        <h1>FT8 Decoder</h1>
+        <h1 id="modeTitle">FT8 Decoder</h1>
+      </div>
+      <div class="mode-selector">
+        <button id="modeFT8" class="btn btn-small btn-mode active">FT8</button>
+        <button id="modeFT4" class="btn btn-small btn-mode">FT4</button>
       </div>
       <div class="controls">
         <button id="startBtn" class="btn btn-primary">
@@ -87,7 +91,7 @@
     </section>
 
     <footer class="footer">
-      <span>FT8 Decoder v1.1</span>
+      <span id="footerMode">FT8 Decoder v1.2</span>
       <span id="sessionStats">0 decodes</span>
     </footer>
   </div>
